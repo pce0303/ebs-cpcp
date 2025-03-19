@@ -26,7 +26,7 @@ router.get('/login', (req, res) => {
 router.get('/google/callback', async (req, res) => {
   const { code } = req.query;
   console.log(`code: ${code}`);
-  
+  1  
   try {
     const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
       code,
