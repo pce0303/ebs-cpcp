@@ -5,7 +5,12 @@
     "**/.hg": true,
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
-    "**/CVS": true
+    "**/CVS": true,
+    "frontend/src/pages/login.css": true,
+    "frontend/src/pages/login.jsx": true
   },
-  "hide-files.files": []
+  "hide-files.files": [
+    "frontend/src/pages/login.css",
+    "frontend/src/pages/login.jsx"
+  ]
 }

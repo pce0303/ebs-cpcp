@@ -1,0 +1,205 @@
+* {
+  background-color: #fafafa;
+  margin: 0 auto;
+  color: black;
+}
+
+.main-container {
+  display: flex; 
+  justify-content: space-between;
+  margin: 20px;
+  padding: 20px; 
+}
+
+.container1, .container2 {
+  border-radius: 8px; 
+  padding: 20px; 
+  width: 50%; 
+}
+
+.title {
+  color: black;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.calendar {
+  background-color: #edede9;
+  color: black;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.calendar-header {
+  display: flex;
+  background-color: #edede9;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-button {
+  background: none;
+  color: black;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.month {
+  font-size: 20px;
+  font-weight: bold;
+  background-color: #edede9;
+}
+
+.days {
+  display: grid;
+  background-color: #edede9;
+  grid-template-columns: repeat(7, 1fr);
+  margin-top: 10px;
+}
+
+.day {
+  padding: 10px;
+  background-color: #edede9;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.selected {
+  background-color: white; 
+  border-radius: 50%; 
+  height: 10px;
+  width: 10px;
+  color: black;
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  margin: 0 auto; 
+}
+
+
+.subject-selection {
+  display: flex;
+  justify-content: space-between; 
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.subject-button {
+  background-color: #9CB47A;
+  color: black;
+  font-weight: 600;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 5px;
+  outline: none; /* 異붽� */
+}
+
+.subject-button:focus {
+  outline: none; /* 異붽� */
+}
+
+.subject-button.active {
+  background-color: #8A9A5B;
+}
+
+
+
+.subject-box {
+  margin: 10px 0; 
+}
+
+.subject-name {
+  margin-bottom: 5px; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+}
+
+.select-button {
+  background-color: #8A9A5B;
+  color: black;
+  font-weight: 600;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none; /* 異붽� */
+}
+.select-button:hover {
+  background-color: #7C8A54;
+}
+
+.select-button:focus {
+  outline: none; /* 異붽� */
+}
+
+
+.link {
+  margin-bottom: auto;
+  margin-top: -30px;
+  white-space: nowrap; 
+}
+
+.link a {
+  color: #575757;
+  text-decoration: none;
+}
+
+.custom-select {
+  width: 100%; 
+  padding: 10px; 
+  border: none; 
+  border-radius: 5px; 
+  background-color: #edede9; 
+  color: black; 
+  appearance: none; 
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><polygon points="0,0 10,0 5,5" fill="%23689067"/></svg>'); 
+  background-repeat: no-repeat; 
+  background-position: right 10px center; 
+}
+
+.custom-select:focus {
+  outline: none; 
+  box-shadow: 0 0 5px rgba(104, 144, 103, 0.5); 
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-end; 
+  margin-top: 20px; 
+  gap: 10px;
+}
+
+.user-info {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info p {
+  font-weight: 600;
+}
+
+.auth-button {
+  background-color: #9CB47A;
+  color: black;
+  font-weight: 600;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.auth-button:hover {
+  background-color: #8A9A5B;
+}
