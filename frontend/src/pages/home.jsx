@@ -1,32 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './home.css';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(null);
   const [categories, setCategories] = useState(['세부과목']);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [activeSubject, setActiveSubject] = useState(null);
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedSubSubject, setSelectedSubSubject] = useState('');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('');
-  const [userName, setUserName] = useState(null); // 사용자 이름 상태 추가
-
-  // 로그인된 사용자의 이름을 백엔드에서 가져오기
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/auth/info');
-        setUserName(response.data.name); // 백엔드에서 받아온 사용자 이름을 설정
-      } catch (error) {
-        console.error('로그인 정보 가져오기 실패', error);
-        setUserName(null); // 로그인되지 않은 경우
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+  const [activeCategory, setActiveCategory] = useState('세부과목');
+  const [activeDifficulty, setActiveDifficulty] = useState('난이도');
 
   const handleDateClick = (day) => {
     setSelectedDate(day);
@@ -34,7 +18,9 @@ const Home = () => {
 
   const handleSubjectClick = (subject) => {
     setActiveSubject(subject);
-    setSelectedSubject(subject); // 추가
+    setActiveCategory('세부과목');
+    setActiveDifficulty('난이도');
+
     if (subject === '수학') {
       setCategories(['확통', '미적', '기하', '수1', '수2']);
     } else if (subject === '영어') {
@@ -42,6 +28,14 @@ const Home = () => {
     } else {
       setCategories(['독서', '문학', '언어와 매체']);
     }
+  };
+
+  const handleCategoryChange = (event) => {
+    setActiveCategory(event.target.value);
+  };
+
+  const handleDifficultyChange = (event) => {
+    setActiveDifficulty(event.target.value);
   };
 
   const nextMonth = () => {
@@ -68,42 +62,25 @@ const Home = () => {
 
   const daysInMonth = getDaysInMonth(currentMonth, currentYear);
 
-  const handleSelect = async () => {
-    const userEmail = 'user@example.com';
-
-    const planData = {
-      date: selectedDate,
-      subject: selectedSubject,
-      subSubject: selectedSubSubject,
-      type: selectedDifficulty,
-      email: userEmail,
-    };
-
-    try {
-      const response = await axios.post('http://localhost:3000/api/plans', planData);
-      console.log('Plan saved:', response.data);
-      alert('계획이 등록되었습니다!');
-    } catch (error) {
-      console.error('Error saving plan:', error);
-      alert('계획 등록에 실패하였습니다!');
+  const handleSelectClick = () => {
+    if (!activeSubject || activeCategory === '세부과목' || activeDifficulty === '난이도') {
+      alert('과목, 세부과목, 난이도를 모두 선택해주세요.');
+      return;
     }
+    navigate('/recommendations', {
+      state: {
+        subject: activeSubject,
+        category: activeCategory,
+        difficulty: activeDifficulty
+      },
+    });
   };
 
-  // 로그인 페이지로 이동
-  const handleLoginRedirect = () => {
-    window.location.href = 'http://localhost:3000/auth'; // 로그인 페이지로 이동
+  const handleViewPlanClick = (e) => {
+    e.preventDefault();
+    navigate('/plan');
   };
 
-  // 로그아웃 처리
-  const handleLogout = async () => {
-    try {
-      await axios.get('http://localhost:3000/auth/logout'); // 로그아웃 API 호출
-      setUserName(null); // 사용자 이름 초기화
-      alert('로그아웃 되었습니다.');
-    } catch (error) {
-      console.error('로그아웃 실패', error);
-    }
-  };
 
   return (
     <div className="main-container">
@@ -154,16 +131,16 @@ const Home = () => {
           </button>
         </div>
         <div className="subject-box">
-          <select className="custom-select" onChange={(e) => setSelectedSubSubject(e.target.value)}>
-            <option>세부과목</option>
+          <select className="custom-select" onChange={handleCategoryChange} value={activeCategory}>
+            <option disabled>세부과목</option>
             {categories.map((category, index) => (
-              <option key={index}>{category}</option>
+              <option key={index} value={category}>{category}</option>
             ))}
           </select>
         </div>
         <div className="subject-box">
-          <select className="custom-select" onChange={(e) => setSelectedDifficulty(e.target.value)}>
-            <option>난이도</option>
+          <select className="custom-select" onChange={handleDifficultyChange} value={activeDifficulty}>
+            <option disabled>난이도</option>
             <option>개념</option>
             <option>심화</option>
           </select>
@@ -172,21 +149,11 @@ const Home = () => {
 
       <div className="button-container">
         <div className="link">
-          <a href="/plan">내 계획 확인하러 가기 ≫</a>
+          <button className="view-plan-link" onClick={handleViewPlanClick}>
+            내 계획 확인하러 가기 ≫
+          </button>
         </div>
-        <button className="select-button" onClick={handleSelect}>선택</button>
-      </div>
-
-      {/* 로그인된 상태에서 사용자 이름 표시 */}
-      <div className="user-info">
-        {userName ? (
-          <>
-            <p>{userName}님</p>
-            <button className='auth-button' onClick={handleLogout}>로그아웃</button>
-          </>
-        ) : (
-          <button className='auth-button' onClick={handleLoginRedirect}>로그인</button>
-        )}
+        <button className="select-button" onClick={handleSelectClick}>선택</button>
       </div>
     </div>
   );
