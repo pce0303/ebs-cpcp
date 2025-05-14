@@ -4,7 +4,7 @@ dotenv.config();
 import express from 'express';
 import axios from 'axios';
 import session from 'express-session';
-import pool from '../db.js';
+import db from '../db.js';
 
 const router = express.Router();
 
@@ -20,49 +20,64 @@ router.get('/', (req, res) => {
   res.redirect(url);
 });
 
-router.get('/google/callback', async (req, res) => {
+router.get('/google/callback', (req, res) => {
   const { code } = req.query;
   console.log(`OAuth code: ${code}`);
 
-  try {
-    // 1. Access Token 요청
-    const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
-      code,
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
-      grant_type: 'authorization_code'
-    });
-
+  // 1. Access Token 요청
+  axios.post('https://oauth2.googleapis.com/token', {
+    code,
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    grant_type: 'authorization_code'
+  })
+  .then(tokenResponse => {
     const accessToken = tokenResponse.data.access_token;
 
     // 2. 사용자 정보 요청
-    const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+    return axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
-
+  })
+  .then(userInfoResponse => {
     const { email, name } = userInfoResponse.data;
     console.log(`Google user info: ${name} (${email})`);
 
-    // 3. DB 사용자 존재 여부 확인 및 삽입
-    const [rows] = await pool.promise().query('SELECT * FROM user WHERE email = ?', [email]);
+    // 3. DB 사용자 존재 여부 확인
+    db.query('SELECT * FROM user WHERE email = ?', [email], (selectErr, rows) => {
+      if (selectErr) {
+        console.error('DB select error:', selectErr);
+        return res.redirect('/?error=' + encodeURIComponent('DB 조회 에러'));
+      }
 
-    if (rows.length === 0) {
-      await pool.query('INSERT INTO user (email, name) VALUES (?, ?)', [email, name]);
-      console.log(`New user added: ${name} (${email})`);
-    } else {
-      console.log(`User already exists: ${name} (${email})`);
-    }
+      if (rows.length === 0) {
+        // 4. 사용자 삽입
+        db.query('INSERT INTO user (email, name) VALUES (?, ?)', [email, name], (insertErr, result) => {
+          if (insertErr) {
+            console.error('DB insert error:', insertErr);
+            return res.redirect('/?error=' + encodeURIComponent('DB 삽입 에러'));
+          }
+          console.log(`New user added: ${name} (${email})`);
+          finalizeLogin();
+        });
+      } else {
+        console.log(`User already exists: ${name} (${email})`);
+        finalizeLogin();
+      }
 
-    // 4. 세션 저장
-    req.session.user = { email, name };
-    console.log(`로그인 성공: ${email}`);
-
-    res.redirect('/');
-  } catch (error) {
-    console.error('Error during Google OAuth:', error.response?.data || error.message);
+      function finalizeLogin() {
+        // 5. 세션 저장
+        req.session.user = { email, name };
+        console.log(`로그인 성공: ${email}`);
+        res.redirect('/');
+      }
+    });
+  })
+  .catch(error => {
+    console.error('OAuth process error:', error.response?.data || error.message);
     res.redirect('/?error=' + encodeURIComponent('OAuth 에러'));
-  }
+  });
 });
 
 router.get('/logout', (req, res) => {
