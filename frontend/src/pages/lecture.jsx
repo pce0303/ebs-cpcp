@@ -5,7 +5,7 @@ import './lecture.css';
 const Recommendations = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { subject, category, difficulty } = location.state || {};
+  const { subject, category, difficulty, plannedDate } = location.state || {};
   const [availableCourses, setAvailableCourses] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
 
@@ -18,7 +18,7 @@ const Recommendations = () => {
         setAvailableCourses(data);
         setSelectedCourses([]);
       } catch (error) {
-        console.error('Failed to fetch recommendations', error);
+        console.error('추천 강좌 불러오기 실패', error);
       }
     };
 
@@ -41,21 +41,30 @@ const Recommendations = () => {
       return;
     }
 
+    if (!plannedDate) {
+      alert('계획 날짜가 없습니다.');
+      return;
+    }
+
     try {
       const response = await fetch('/api/plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course_ids: selectedCourses.map(c => c.id) }),
+        body: JSON.stringify({
+          courses_ids: selectedCourses.map(c => c.id),
+          planned_date: plannedDate,
+        }),
       });
 
       if (response.ok) {
         alert('투두리스트에 추가되었습니다.');
         navigate('/plan');
       } else {
-        alert('추가 실패');
+        const errorData = await response.json();
+        alert(errorData.error || '추가 실패');
       }
     } catch (error) {
-      console.error('Failed to add to todo', error);
+      console.error('투두 추가 실패', error);
     }
   };
 

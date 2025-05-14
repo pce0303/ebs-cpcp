@@ -22,28 +22,33 @@ router.get('/', (req, res) => {
 
 // 계획 등록
 router.post('/', (req, res) => {
-    const { courses_ids } = req.body;
+    const { courses_ids, planned_date } = req.body;
     const userEmail = req.session.user.email;
 
-    if(!userEmail) {
+    if (!userEmail) {
         return res.status(401).json({ error: '로그인 필요' });
+    }
+
+    if (!planned_date) {
+        return res.status(400).json({ error: '계획 날짜가 필요합니다' });
     }
 
     const userQuery = `SELECT id FROM users WHERE email = ?`;
     db.query(userQuery, [userEmail], (err, users) => {
-        if(err) return res.status(500).json({ error: err.message });
-        if(users.length === 0) return res.status(404).json({ error: '사용자 없음' });
+        if (err) return res.status(500).json({ error: err.message });
+        if (users.length === 0) return res.status(404).json({ error: '사용자 없음' });
 
         const userId = users[0].id;
-        const values = courses_ids.map(courseId => [userId, courseId]);
+        const values = courses_ids.map(courseId => [userId, courseId, planned_date]);
 
-        const insertQuery = `INSERT INTO todo (user_id, course_id) VALUES ?`;
+        const insertQuery = `INSERT INTO todo (user_id, course_id, planned_date) VALUES ?`;
         db.query(insertQuery, [values], (err, result) => {
-            if(err) return res.status(500).json({ error: err.message });
+            if (err) return res.status(500).json({ error: err.message });
             res.status(201).json({ message: '계획 등록 완료', inserted: result.affectedRows });
         });
-    })
+    });
 });
+
 
 // 계획 수정
 router.put('/:id', (req, res) => {

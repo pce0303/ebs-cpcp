@@ -67,14 +67,23 @@ const Home = () => {
       alert('과목, 세부과목, 난이도를 모두 선택해주세요.');
       return;
     }
+    if (!selectedDate) {
+      alert('날짜를 선택해주세요.');
+      return;
+    }
+  
+    const plannedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
+  
     navigate('/course', {
       state: {
         subject: activeSubject,
         category: activeCategory,
-        difficulty: activeDifficulty
+        difficulty: activeDifficulty,
+        plannedDate: plannedDate,
       },
     });
   };
+  
 
   const handleViewPlanClick = (e) => {
     e.preventDefault();
