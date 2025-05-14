@@ -1,52 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './lecture.css';
-import EBS from '../ebsi.png'; 
-import MEGA from '../megastudy.jpg'; 
 
 const Recommendations = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { subject, category, difficulty } = location.state || {};
-  const [availableCourses, setAvailableCourses] = useState([]); 
+  const [availableCourses, setAvailableCourses] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
 
-
-  const allCourses = [
-    { id: 1, title: '[2023 수능특강] 윤혜정의 독서', logo: EBS, subject: '국어', category: '독서', difficulty: '개념' },
-    { id: 2, title: '[2023 수능특강] 강민철의 독서', logo: MEGA, subject: '국어', category: '독서', difficulty: '개념' },
-    { id: 3, title: '[2023 수능특강] 윤혜정의 독서', logo: EBS, subject: '국어', category: '독서', difficulty: '심화' },
-    { id: 4, title: '[2023 수능특강] 윤혜정의 문학', logo: EBS, subject: '국어', category: '문학', difficulty: '개념' },
-    { id: 5, title: '[2023 수능특강] 윤혜정의문학', logo: EBS, subject: '국어', category: '문학', difficulty: '심화' },
-    { id: 6, title: '[2023 수능특강] 정승제의 수1',  logo: EBS, subject: '수학', category: '수1', difficulty: '개념' },
-    { id: 7, title: '[2023 수능특강] 정승제의 미적분', logo: EBS, subject: '수학', category: '미적분', difficulty: '개념' },
-    { id: 8, title: '[2023 수능특강] 조정식의 문법', logo: MEGA, subject: '영어', category: '문법', difficulty: '심화' },
-  ];
-
   useEffect(() => {
-    const filteredCourses = allCourses.filter(course =>
-      course.subject === subject &&
-      course.category === category &&
-      course.difficulty === difficulty
-    );
-    setAvailableCourses(filteredCourses); 
-    setSelectedCourses([]); 
+    const fetchRecommendations = async () => {
+      try {
+        const params = new URLSearchParams({ subject, category, difficulty });
+        const response = await fetch(`/api/plans/course?${params}`);
+        const data = await response.json();
+        setAvailableCourses(data);
+        setSelectedCourses([]);
+      } catch (error) {
+        console.error('Failed to fetch recommendations', error);
+      }
+    };
+
+    if (subject && category && difficulty) {
+      fetchRecommendations();
+    }
   }, [subject, category, difficulty]);
 
   const handleCheckboxChange = (course) => {
-    setSelectedCourses(prevSelectedCourses => {
-      const isSelected = prevSelectedCourses.find(c => c.id === course.id);
-
-      if (isSelected) {
-        return prevSelectedCourses.filter(c => c.id !== course.id);
-      } else {
-        return [...prevSelectedCourses, course];
-      }
-    });
+    setSelectedCourses(prev =>
+      prev.find(c => c.id === course.id)
+        ? prev.filter(c => c.id !== course.id)
+        : [...prev, course]
+    );
   };
 
-  const handleConfirmClick = () => {
-    navigate('/plan', { state: { selectedCourses: selectedCourses } });
+  const handleConfirmClick = async () => {
+    if (selectedCourses.length === 0) {
+      alert('강좌를 선택하세요.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ course_ids: selectedCourses.map(c => c.id) }),
+      });
+
+      if (response.ok) {
+        alert('투두리스트에 추가되었습니다.');
+        navigate('/plan');
+      } else {
+        alert('추가 실패');
+      }
+    } catch (error) {
+      console.error('Failed to add to todo', error);
+    }
   };
 
   return (

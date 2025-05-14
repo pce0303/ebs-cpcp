@@ -67,7 +67,7 @@ const Home = () => {
       alert('과목, 세부과목, 난이도를 모두 선택해주세요.');
       return;
     }
-    navigate('/recommendations', {
+    navigate('/course', {
       state: {
         subject: activeSubject,
         category: activeCategory,
