@@ -1,0 +1,129 @@
+.recommendations-container {
+  max-width: 600px;
+  margin: 100px auto 40px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+}
+
+.recommendations-container .name {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-x: hidden;
+}
+
+.course-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
+  background-color: transparent;
+  border-bottom: 1px solid #ddd;
+  justify-content: flex-start;
+  height: 70px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.course-item:last-child {
+  border-bottom: none;
+}
+
+.course-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.course-item label {
+  flex-grow: 1;
+  margin-right: 10px;
+  font-size: 16px;
+  color: #555;
+  cursor: pointer;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  display: block;
+}
+
+body::-webkit-scrollbar {
+  width: 4px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.course-item label::-webkit-scrollbar {
+  width: 2px;
+  height: 4px;
+}
+
+.course-item label::-webkit-scrollbar-track {
+  background: #f9f9f9;
+}
+
+.course-item label::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.course-item label::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.course-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+
+.course-list p {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+}
+
+.confirm-button {
+  display: block;
+  width: 15%;
+  padding: 12px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  background-color: #8A9A5B;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.confirm-button:hover {
+  background-color: #7C8A54;
+}

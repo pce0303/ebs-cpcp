@@ -1,17 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/home'; // Home 컴포넌트
-import Login from './pages/login'; // Login 컴포넌트
-import Lecture from './pages/lecture'; // Lecture 컴포넌트
-import './App.css';
+import Home from './pages/home';
+import Recommendations from './pages/recommendations';
+import Plan from './pages/plan';
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/course" element={<Lecture />} />
+        <Route path="/recommendations" element={<Recommendations />} />
+        <Route path="/plan" element={<Plan />} />
       </Routes>
     </Router>
   );

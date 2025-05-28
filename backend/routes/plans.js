@@ -53,10 +53,10 @@ router.post('/', (req, res) => {
 // 계획 수정
 router.put('/:id', (req, res) => {
     const { id } = req.params;
-    const { date, subject, subSubject, type } = req.body;
+    const { date, subject, category, type } = req.body;
     const query = `UPDATE plans SET date = ?, subject = ?, sub_subject = ?, type = ? WHERE id = ?`;
 
-    db.query(query, [date, subject, subSubject, type, id], (err, result) => {
+    db.query(query, [date, subject, category, type, id], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ id: parseInt(id), date, subject, subSubject, type });
     });

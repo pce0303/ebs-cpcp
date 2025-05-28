@@ -97,11 +97,11 @@
   border-radius: 10px;
   cursor: pointer;
   margin-top: 5px;
-  outline: none; /* 異붽� */
+  outline: none; 
 }
 
 .subject-button:focus {
-  outline: none; /* 異붽� */
+  outline: none;
 }
 
 .subject-button.active {
@@ -129,14 +129,14 @@
   padding: 10px 20px;
   border-radius: 10px;
   cursor: pointer;
-  outline: none; /* 異붽� */
+  outline: none; 
 }
 .select-button:hover {
   background-color: #7C8A54;
 }
 
 .select-button:focus {
-  outline: none; /* 異붽� */
+  outline: none; 
 }
 
 
@@ -177,29 +177,29 @@
   gap: 10px;
 }
 
-.user-info {
-  position: absolute;
-  top: 20px;
-  right: 30px;
+.view-plan-link1 {
+  color: #575757;
+  background-color: #fafafa;
+  border: 0;
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.user-info p {
+  align-items: center; /* 이미지와 텍스트를 수직으로 정렬 */
+  margin-bottom: 10px; /* 버튼 간의 간격 조정 */
+  font-size: 16px;
   font-weight: 600;
 }
 
-.auth-button {
-  background-color: #9CB47A;
-  color: black;
-  font-weight: 600;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
+.view-plan-link2 {
+  color: #575757;
+  background-color: #fafafa;
+  border: 0;
+  display: flex;
+  align-items: center; /* 이미지와 텍스트를 수직으로 정렬 */
+  margin-bottom: 10px; /* 버튼 간의 간격 조정 */
+  font-size: 17px;
 }
 
-.auth-button:hover {
-  background-color: #8A9A5B;
+.google_logo {
+  width:20px;
+  height: auto;
+  margin-right: 8px; /* 이미지와 텍스트 간의 간격 조정 */
 }

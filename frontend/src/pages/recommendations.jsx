@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './lecture.css';
+import './recommendations.css';
 
 const Recommendations = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { subject, category, difficulty, plannedDate } = location.state || {};
+  const { subject, category, difficulty, selectedDateFull } = location.state || {};
+
   const [availableCourses, setAvailableCourses] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
 
@@ -41,7 +42,7 @@ const Recommendations = () => {
       return;
     }
 
-    if (!plannedDate) {
+    if (!selectedDateFull) {
       alert('계획 날짜가 없습니다.');
       return;
     }
@@ -52,7 +53,7 @@ const Recommendations = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           courses_ids: selectedCourses.map(c => c.id),
-          planned_date: plannedDate,
+          planned_date: selectedDateFull,
         }),
       });
 
@@ -76,7 +77,9 @@ const Recommendations = () => {
           availableCourses.map((course) => (
             <div className="course-item" key={course.id}>
               <img src={course.logo} alt="로고" className="course-logo" />
-              <label htmlFor={`course-${course.id}`}>{course.title}</label>
+              <label className="course-title" htmlFor={`course-${course.id}`}>
+                {course.title}
+              </label>
               <input
                 type="checkbox"
                 id={`course-${course.id}`}
