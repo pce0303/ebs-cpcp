@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import session from 'express-session';
 import dotenv from 'dotenv';
-import loginRouter from './routes/login.js';
+import authRouter from './routes/auth.js';
 import planRouter from './routes/plans.js';
 
 dotenv.config();
@@ -22,7 +22,7 @@ app.use(session({
   cookie: { secure: false }
 }));
 
-app.use('/auth', loginRouter);
+app.use('/auth', authRouter);
 app.use('/api/plans', planRouter);
 
 const frontendPath = path.join(__dirname, '..', 'frontend', 'dist');

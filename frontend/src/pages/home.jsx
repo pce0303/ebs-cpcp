@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
-import GoogleLogo from '../google-logo.png';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -16,7 +15,6 @@ const Home = () => {
   const [activeCategory, setActiveCategory] = useState('세부과목');
   const [activeDifficulty, setActiveDifficulty] = useState('난이도');
 
-  // ✅ 로그인 상태 확인
   useEffect(() => {
     fetch('/auth/info', { credentials: 'include' })
       .then(res => res.ok ? res.json() : null)
@@ -34,7 +32,6 @@ const Home = () => {
 
   const handleLoginOrLogout = () => {
     if (userName) {
-      // ✅ 로그아웃 처리
       fetch('/auth/logout', { credentials: 'include' })
         .then(res => {
           if (res.ok) {
@@ -44,7 +41,6 @@ const Home = () => {
           }
         });
     } else {
-      // ✅ 로그인 요청
       window.location.href = '/auth';
     }
   };
@@ -86,7 +82,11 @@ const Home = () => {
 
   const handleViewPlanClick = (e) => {
     e.preventDefault();
-    navigate('/plan', { state: { selectedFullDate } });
+    if (!selectedFullDate) {
+      alert('날짜를 먼저 선택해주세요.');
+      return;
+    }
+    navigate(`/plan?date=${selectedFullDate}`);
   };
 
   const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
@@ -161,7 +161,7 @@ const Home = () => {
       <div className="button-container">
         <div className="link">
           <button className="view-plan-link1" onClick={handleLoginOrLogout}>
-            <img src={GoogleLogo} className="google_logo" alt="Google Logo" />
+            <img src={`/google-logo.png`} className="google_logo" alt="Google Logo" />
             {userName ? `${userName}` : '구글 로그인'}
           </button>
           <button className="view-plan-link2" onClick={handleViewPlanClick}>
