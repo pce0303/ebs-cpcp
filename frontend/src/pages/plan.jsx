@@ -40,37 +40,31 @@ const Plan = () => {
 
   const [coursesWithCompletion, setCoursesWithCompletion] = useState([]);
 
-  // 데이터 불러오기
+
   useEffect(() => {
     if (!selectedFullDate) {
       setCoursesWithCompletion([]);
       return;
     }
-
     const fetchCourses = async () => {
       try {
         const response = await fetch(`/api/plans?date=${selectedFullDate}`);
         const data = await response.json();
-
         if (!Array.isArray(data)) {
           setCoursesWithCompletion([]);
           return;
         }
-
         const completedStatus = loadCompletedStatus();
-
         const updatedCourses = data.map(course => ({
           ...course,
           isCompleted: !!completedStatus[course.id],
         }));
-
         setCoursesWithCompletion(updatedCourses);
       } catch (error) {
         console.error("계획 불러오기 실패:", error);
         setCoursesWithCompletion([]);
       }
     };
-
     fetchCourses();
   }, [selectedFullDate, loadCompletedStatus]);
 
@@ -100,20 +94,41 @@ const Plan = () => {
 
   const getPlatformLogo = (logo) => (logo ? `/${logo}.png` : DEFAULT_LOGO);
 
-  const handleDeleteCourse = (courseId) => {
-    setCoursesWithCompletion((prevCourses) => {
-      // 삭제할 강좌를 제외한 새 배열 생성
-      const updatedCourses = prevCourses.filter(course => course.id !== courseId);
+  const handleDeleteCourse = async (courseId) => {
+    try {
+      const response = await fetch('/api/plans', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          courseId,
+          date: selectedFullDate,
+        }),
+      });
 
-      // 삭제된 강좌의 완료 상태(localStorage)도 업데이트
-      const completedStatus = loadCompletedStatus();
-      if (completedStatus[courseId]) {
-        delete completedStatus[courseId];
-        saveCompletedStatus(completedStatus);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('서버 삭제 실패:', errorData.error);
+        return;
       }
 
-      return updatedCourses;
-    });
+      // 삭제 성공 시 상태에서도 제거
+      setCoursesWithCompletion((prevCourses) => {
+        const updatedCourses = prevCourses.filter(course => course.id !== courseId);
+
+        const completedStatus = loadCompletedStatus();
+        if (completedStatus[courseId]) {
+          delete completedStatus[courseId];
+          saveCompletedStatus(completedStatus);
+        }
+
+        return updatedCourses;
+      });
+
+    } catch (error) {
+      console.error('삭제 요청 실패:', error);
+    }
   };
 
   return (
