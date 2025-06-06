@@ -2,107 +2,124 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
 
+const SUBJECT_CATEGORIES = {
+  수학: ['확률과 통계', '미적분', '기하', '수학 I', '수학 II'],
+  영어: ['듣기', '문법', '독해'],
+  국어: ['독서', '문학', '언어와 매체', '화법과 작문'],
+};
+
+const DIFFICULTIES = ['개념', '심화'];
+
+const getFormattedDate = (year, month, day) =>
+  `${year}.${String(month + 1).padStart(2, '0')}.${String(day).padStart(2, '0')}`;
+
+const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+
 const Home = () => {
   const navigate = useNavigate();
 
-  const [userName, setUserName] = useState(localStorage.getItem('userName') || null);
-  const [selectedFullDate, setSelectedFullDate] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [categories, setCategories] = useState(['세부과목']);
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [userName, setUserName] = useState(() => localStorage.getItem('userName'));
+  const [selectedDate, setSelectedDate] = useState(null); // { year, month, day } or null
+  const [categories, setCategories] = useState([]);
+  const [calendar, setCalendar] = useState({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
+  });
   const [activeSubject, setActiveSubject] = useState(null);
   const [activeCategory, setActiveCategory] = useState('세부과목');
   const [activeDifficulty, setActiveDifficulty] = useState('난이도');
 
   useEffect(() => {
-    fetch('/auth/info', { credentials: 'include' })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
+    (async () => {
+      try {
+        const res = await fetch('/auth/info', { credentials: 'include' });
+        if (!res.ok) throw new Error('Not logged in');
+        const data = await res.json();
         if (data?.name) {
           setUserName(data.name);
           localStorage.setItem('userName', data.name);
+        } else {
+          setUserName(null);
+          localStorage.removeItem('userName');
         }
-      })
-      .catch(() => {
+      } catch {
         setUserName(null);
         localStorage.removeItem('userName');
-      });
+      }
+    })();
   }, []);
 
-  const handleLoginOrLogout = () => {
+  const handleLoginOrLogout = async () => {
     if (userName) {
-      fetch('/auth/logout', { credentials: 'include' })
-        .then(res => {
-          if (res.ok) {
-            alert('로그아웃 되었습니다.');
-            setUserName(null);
-            localStorage.removeItem('userName');
-          }
-        });
+      try {
+        const res = await fetch('/auth/logout', { credentials: 'include' });
+        if (res.ok) {
+          alert('로그아웃 되었습니다.');
+          setUserName(null);
+          localStorage.removeItem('userName');
+        }
+      } catch (e) {
+        console.error(e);
+      }
     } else {
       window.location.href = '/auth';
     }
   };
 
   const handleDateClick = (day) => {
-    setSelectedDay(day);
-    const fullDateString = `${currentYear}.${String(currentMonth + 1).padStart(2, '0')}.${String(day).padStart(2, '0')}`;
-    setSelectedFullDate(fullDateString);
+    setSelectedDate({ year: calendar.year, month: calendar.month, day });
   };
 
   const handleSubjectClick = (subject) => {
     setActiveSubject(subject);
     setActiveCategory('세부과목');
     setActiveDifficulty('난이도');
-    setCategories(
-      subject === '수학' ? ['확통', '미적', '기하', '수1', '수2'] :
-      subject === '영어' ? ['듣기', '문법', '독해'] :
-      ['독서', '문학', '언어와 매체']
-    );
+    setCategories(SUBJECT_CATEGORIES[subject] || []);
   };
 
   const handleSelectClick = () => {
-    if (!userName) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
+    if (!userName) return alert('로그인이 필요합니다.');
     if (!activeSubject || activeCategory === '세부과목' || activeDifficulty === '난이도') {
-      alert('과목, 세부과목, 난이도를 모두 선택해주세요.');
-      return;
+      return alert('과목, 세부과목, 난이도를 모두 선택해주세요.');
     }
-    if (!selectedFullDate) {
-      alert('날짜를 선택해주세요.');
-      return;
-    }
+    if (!selectedDate) return alert('날짜를 선택해주세요.');
+
+    const fullDateString = getFormattedDate(selectedDate.year, selectedDate.month, selectedDate.day);
+
     navigate('/recommendations', {
-      state: { subject: activeSubject, category: activeCategory, difficulty: activeDifficulty, selectedFullDate }
+      state: {
+        subject: activeSubject,
+        category: activeCategory,
+        difficulty: activeDifficulty,
+        selectedFullDate: fullDateString,
+      },
     });
   };
 
   const handleViewPlanClick = (e) => {
     e.preventDefault();
-    if (!selectedFullDate) {
-      alert('날짜를 먼저 선택해주세요.');
-      return;
-    }
-    navigate(`/plan?date=${selectedFullDate}`);
+    if (!selectedDate) return alert('날짜를 먼저 선택해주세요.');
+    const fullDateString = getFormattedDate(selectedDate.year, selectedDate.month, selectedDate.day);
+    navigate(`/plan?date=${fullDateString}`);
   };
 
-  const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
-  const daysInMonth = getDaysInMonth(currentMonth, currentYear);
   const nextMonth = () => {
-    setCurrentMonth(prev => (prev === 11 ? 0 : prev + 1));
-    if (currentMonth === 11) setCurrentYear(prev => prev + 1);
-    setSelectedDay(null);
-    setSelectedFullDate(null);
+    setCalendar(({ year, month }) => {
+      if (month === 11) return { year: year + 1, month: 0 };
+      return { year, month: month + 1 };
+    });
+    setSelectedDate(null);
   };
+
   const prevMonth = () => {
-    setCurrentMonth(prev => (prev === 0 ? 11 : prev - 1));
-    if (currentMonth === 0) setCurrentYear(prev => prev - 1);
-    setSelectedDay(null);
-    setSelectedFullDate(null);
+    setCalendar(({ year, month }) => {
+      if (month === 0) return { year: year - 1, month: 11 };
+      return { year, month: month - 1 };
+    });
+    setSelectedDate(null);
   };
+
+  const daysInMonth = getDaysInMonth(calendar.year, calendar.month);
 
   return (
     <div className="main-container">
@@ -111,16 +128,22 @@ const Home = () => {
         <div className="calendar">
           <div className="calendar-header">
             <button className="nav-button" onClick={prevMonth}>◀</button>
-            <span className="month">{currentYear}. {String(currentMonth + 1).padStart(2, '0')}</span>
+            <span className="month">
+              {calendar.year}. {String(calendar.month + 1).padStart(2, '0')}
+            </span>
             <button className="nav-button" onClick={nextMonth}>▶</button>
           </div>
           <div className="days">
             {[...Array(daysInMonth)].map((_, i) => {
               const day = i + 1;
+              const isSelected = selectedDate?.day === day &&
+                selectedDate?.month === calendar.month &&
+                selectedDate?.year === calendar.year;
+
               return (
                 <span
                   key={day}
-                  className={`day ${day === selectedDay ? 'selected' : ''}`}
+                  className={`day ${isSelected ? 'selected' : ''}`}
                   onClick={() => handleDateClick(day)}
                 >
                   {day}
@@ -133,7 +156,7 @@ const Home = () => {
 
       <div className="container2">
         <div className="subject-selection">
-          {['국어', '수학', '영어'].map(subject => (
+          {Object.keys(SUBJECT_CATEGORIES).map(subject => (
             <button
               key={subject}
               className={`subject-button ${activeSubject === subject ? 'active' : ''}`}
@@ -144,16 +167,27 @@ const Home = () => {
           ))}
         </div>
         <div className="subject-box">
-          <select className="custom-select" onChange={e => setActiveCategory(e.target.value)} value={activeCategory}>
+          <select
+            className="custom-select"
+            onChange={e => setActiveCategory(e.target.value)}
+            value={activeCategory}
+          >
             <option value="세부과목" disabled>세부과목</option>
-            {categories.map((c, i) => <option key={i} value={c}>{c}</option>)}
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </select>
         </div>
         <div className="subject-box">
-          <select className="custom-select" onChange={e => setActiveDifficulty(e.target.value)} value={activeDifficulty}>
+          <select
+            className="custom-select"
+            onChange={e => setActiveDifficulty(e.target.value)}
+            value={activeDifficulty}
+          >
             <option value="난이도" disabled>난이도</option>
-            <option value="개념">개념</option>
-            <option value="심화">심화</option>
+            {DIFFICULTIES.map(level => (
+              <option key={level} value={level}>{level}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -162,7 +196,7 @@ const Home = () => {
         <div className="link">
           <button className="view-plan-link1" onClick={handleLoginOrLogout}>
             <img src={`/google-logo.png`} className="google_logo" alt="Google Logo" />
-            {userName ? `${userName}` : '구글 로그인'}
+            {userName || '구글 로그인'}
           </button>
           <button className="view-plan-link2" onClick={handleViewPlanClick}>
             내 계획 확인하러 가기 ≫

@@ -16,10 +16,12 @@
 }
 
 .course-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  overflow-x: hidden;
+  max-height: 400px; /* 원하는 최대 높이로 조절 */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  background-color: #fff;
 }
 
 .course-item {
